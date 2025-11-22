@@ -1,5 +1,5 @@
  /*
-The Macchiato Mini Synth v1.2.0 by Zeppelin Design Labs, Chicago, Illinois. Copyright 2016,2017.
+The Macchiato Mini Synth by Zeppelin Design Labs, Chicago, Illinois. Copyright 2016,2017.
 You are free to edit, add to, improve, destroy, ruin and otherwise modify this
 software in any way. It is covered by the Creative Commons - Share Alike / Attribution / Non-Commercial license.
 If you modify this software and then share or distribute it in any way, you must
@@ -37,14 +37,13 @@ class RCpollAbstract{
   virtual unsigned int next()=0;
 };
 
-//Included Header Files
 #include <MozziGuts.h>
 #include <mozzi_analog.h>
 #include <IntMap.h>
 #include <Oscil.h>
 #include <MIDI.h>
 #include <mozzi_midi.h>
-#include <mozzi_fixmath.h>      //Used for MIDI calcs.  See MIDI.h & mozzi_midi.h to see where it's used
+#include <mozzi_fixmath.h>      // Used for MIDI calcs.  See MIDI.h & mozzi_midi.h to see where it's used
 #include <ADSR.h>
 #include <Portamento.h>
 #include <LowPassFilter.h>
@@ -58,13 +57,13 @@ struct MidiSettings : public midi::DefaultSettings {
 
 MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MidiSettings);
 
-//Oscillator Tables used for output Waveshape
+// Oscillator Tables used for output Waveshape
 #include <tables/sin2048_int8.h>
 #include <tables/triangle2048_int8.h>
 #include <tables/saw2048_int8.h>
 #include <tables/square_no_alias_2048_int8.h>
 
-//Oscillator Tables used for Low Frequency Oscillator (LFO)
+// Oscillator Tables used for Low Frequency Oscillator (LFO)
 #include <tables/sin512_int8.h>
 #include <tables/saw512_int8.h>
 #include <tables/ramp512_int8.h>
@@ -85,32 +84,32 @@ Oscil <2048, AUDIO_RATE> aSaw2(SAW2048_DATA);
 Oscil <2048, AUDIO_RATE> aSquare2(SQUARE_NO_ALIAS_2048_DATA);
 Oscil <2048, AUDIO_RATE>* waveforms2[5] = {0, &aSin2, &aTriangle2, &aSaw2, &aSquare2};
 
-//Oscillator Function declared/define for LFO1&2 waveform
+// Oscillator Function declared/define for LFO1&2 waveform
 Oscil <512, CONTROL_RATE> klfo_sin1(SIN512_DATA);
 Oscil <512, CONTROL_RATE> klfo_saw1(SAW512_DATA);
 Oscil <512, CONTROL_RATE> klfo_ramp1(RAMP512_DATA);
 Oscil <512, CONTROL_RATE> klfo_square1(SQUARE_NO_ALIAS512_DATA);
 Oscil <512, CONTROL_RATE>* waveformsLFO[5] = {0, &klfo_sin1, &klfo_saw1, &klfo_ramp1, &klfo_square1};
 
-//ADSR declaration/definition
+// ADSR declaration/definition
 ADSR <CONTROL_RATE, CONTROL_RATE> envelope1;
 ADSR <CONTROL_RATE, CONTROL_RATE> envelope2;
 Portamento <CONTROL_RATE> aPortamento;
 
-//Declaration/definitions for Capacitive Touch Sensor Keys
-RCpoll <4>  key1;           //C
-RCpoll <10> key2;           //C_sharp
-RCpoll <11> key3;           //D
-RCpoll <14> key4;           //D_sharp
-RCpoll <15> key5;           //E
-RCpoll <16> key6;           //F
-RCpoll <17> key7;           //F_sharp
-RCpoll <18> key8;           //G
-RCpoll <19> key9;           //G_sharp
-RCpoll <20> key10;          //A
-RCpoll <21> key11;          //A_sharp
-RCpoll <22> key12;          //B
-RCpoll <23> key13;          //High_C
+// Declaration/definitions for Capacitive Touch Sensor Keys
+RCpoll <4>  key1;           // C
+RCpoll <10> key2;           // C_sharp
+RCpoll <11> key3;           // D
+RCpoll <14> key4;           // D_sharp
+RCpoll <15> key5;           // E
+RCpoll <16> key6;           // F
+RCpoll <17> key7;           // F_sharp
+RCpoll <18> key8;           // G
+RCpoll <19> key9;           // G_sharp
+RCpoll <20> key10;          // A
+RCpoll <21> key11;          // A_sharp
+RCpoll <22> key12;          // B
+RCpoll <23> key13;          // High_C
 RCpollAbstract * keys[13] = {&key1, &key2, &key3, &key4, &key5, &key6, &key7, &key8, &key9, &key10, &key11, &key12, &key13};
 int triggerA[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int triggerB[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -119,11 +118,10 @@ int triggerZ[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int debugCounter = 0;
 //byte midiSysex[128];
 
-LowPassFilter lpf1;       //Short hand declaration for LowPassFilter
+LowPassFilter lpf1;       // Short hand declaration for LowPassFilter
 LowPassFilter lpf2;       // Necessary to get note2 to sound on its own
 
-//-- Global variable declarations ----------------------------------------------------------------------------
-byte mostRecentEnvelope = 2;                      // Holds record of most-recently-played note register.
+byte mostRecentEnvelope = 2;     // Holds record of most-recently-played note register.
 int note1 = 129;                 // polyphony register 1. Default 129=no note assigned.
 int note2 = 129;                 // polyphone register 2. Default 129=no note assigned.
 int wav1;
@@ -145,7 +143,7 @@ bool midiChannelSelect = false;
 int pitch;
 int pitch1;
 int pitch2;
-byte j = 1;           //a counter.
+byte j = 1;
 byte note_available[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};   // Array used to determine if a note is available to play
 
 // The following stores four octaves of pitches, rounded to nearest integer value.
@@ -189,7 +187,6 @@ void handle_note_off(byte channel, byte note, byte velocity);
 void HandlePitchBend(byte channel, int bend);
 void handle_control_change(byte channel, byte number, byte value);
 
-// -----------------------------------------------------------------------------------------
 
 void setup() {
   int midiChannel;
@@ -225,7 +222,6 @@ void setup() {
   lpf2.setResonance(35);
 }
 
-//------FUNCTIONS-------------------------------------------------------------------------------
 void handle_note_on(byte channel, byte note, byte velocity) {
   if (midiChannelSelect) {
     EEPROM.write(2, channel);
@@ -324,7 +320,6 @@ void HandlePitchBend (byte channel, int bend){
   waveforms[wave_form]->setFreq(pitch1*pitchBend);
   waveforms2[wave_form]->setFreq(pitch2*pitchBend);
 }
-//-----end Setup-----------------------------------------------------------------------------------
 
 void updateControl() {
   //TCCR2B = 0;
@@ -429,11 +424,11 @@ void updateControl() {
 
     if (triggerZ[i] == 0 && note_available[i] == 0) {  // Key is not pressed but was playing, ie, key has just been released
       note_available[i] = 1;              // key has just been released; mark it as available
-      if (i == note1) {                    // if current note i was playing in register 1,
+      if (i == note1) {                   // if current note i was playing in register 1,
         envelope1.noteOff();              // Turn off envelope1
         note1 = 129;                      // Clear register 1.
         mostRecentEnvelope = 2;
-      } else if (i == note2) {             // else, if current note i was playing in register 2,
+      } else if (i == note2) {            // else, if current note i was playing in register 2,
         envelope2.noteOff();              // Turn off envelope2
         note2 = 129;                      // Clear register 2.
         mostRecentEnvelope = 1;
@@ -444,10 +439,10 @@ void updateControl() {
   envelope1.update();
   envelope2.update();
   gain_adsr1 = (long)channelVolume * envelope1.next() >> 8;
+  gain_adsr2 = (long)channelVolume * envelope2.next() >> 8;
   if (PortaOn==true) {
     waveforms2[wave_form]->setFreq_Q16n16(aPortamento.next());
   }
-  gain_adsr2 = (long)channelVolume * envelope2.next() >> 8;
 /*
   midiSysex[debugCounter] = trigger[2];
   debugCounter++;
@@ -458,15 +453,12 @@ void updateControl() {
   */
   //interrupts();
 }
-//----------end UpdateControl ---------------------------------------------------------------
 
 int updateAudio() {
   wav1 = waveforms[wave_form]->next();
   wav2 = waveforms2[wave_form]->next();
   return (int) (((long) gain_adsr1 * (-1 - lpf1.next(wav1)) + (long) gain_adsr2 * (-1 -lpf2.next(wav2))) >> 3);
 }
-
-//----end updateAudio -------------------------------------------------------------------------
 
 void loop() {
   audioHook();  // Required here
