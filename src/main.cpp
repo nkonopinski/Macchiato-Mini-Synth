@@ -34,7 +34,7 @@ Share your mods on our forum at www.zeppelindesignlabs.com and/or the Google gro
 
 class RCpollAbstract{
   public:
-  inline virtual unsigned int next()=0;
+  virtual unsigned int next()=0;
 };
 
 //Included Header Files
@@ -462,7 +462,7 @@ gain_lfo1 = (int)((long)(waveformsLFO[LFO_wave_form]->next() + 128) * lfo_depth)
   for (byte i = 0; i < 13; i++)
   {
    triggerA[i] = keys[i]->next();
-   triggerZ[i] = triggerZ[i] & (triggerA[i] | triggerB[i] | triggerC[i]) | (triggerA[i] & triggerB[i] & triggerC[i]);
+   triggerZ[i] = (triggerZ[i] & (triggerA[i] | triggerB[i] | triggerC[i])) | (triggerA[i] & triggerB[i] & triggerC[i]);
    triggerC[i] = triggerB[i];
    triggerB[i] = triggerA[i];   
 
