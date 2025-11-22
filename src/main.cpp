@@ -4,8 +4,8 @@ You are free to edit, add to, improve, destroy, ruin and otherwise modify this
 software in any way. It is covered by the Creative Commons - Share Alike / Attribution / Non-Commercial license.
 If you modify this software and then share or distribute it in any way, you must
 keep the following attributions present:
-1) distrribute it under the same license terms
-2} refrain from selling your work until you talk to the upstream creators (Zeppelin Design Labs and Tim Barrass)
+1) distribute it under the same license terms
+2) refrain from selling your work until you talk to the upstream creators (Zeppelin Design Labs and Tim Barrass)
 3) include the following attributions:
 "Macchiato Mini Synth software by Stephen Collier Cass, Purdue University, Lafayette,Indiana,
 and Glen van Alkemade, Rose-Hulman Institute of Technology, Terre Haute, Indiana,
@@ -16,7 +16,7 @@ Featuring the Mozzi Synth Library by Tim Barrass."
 Features of the synth software:
     2-note polyphony
     MIDI input:
-Responds to pitch bend, note velocity, modulation, channel volume,and portamento time
+Responds to pitch bend, note velocity, modulation, channel volume, and portamento time
     13 Capacitive Touch Keys (1 octave)
     Output Waveshape Adjust (Sine, Triangle, Sawtooth, Square)
     Octave adjust (C2 --> C3,C3 --> C4, C4 --> C5, C5 --> C6)
@@ -27,7 +27,7 @@ Responds to pitch bend, note velocity, modulation, channel volume,and portamento
     LPF Cutoff Frequency Adjust
     LFO Depth
 
-The Macchiato Mini Synth runs on an Atmel ATMega 644PA microcontroller. The 13 capacitive touch keys and 8 control pots occupy most of the 644PAÃ¢â‚¬â„¢s inputs, but there are a few still available for incorporating additional features.
+The Macchiato Mini Synth runs on an Atmel ATMega 644PA microcontroller. The 13 capacitive touch keys and 8 control pots occupy most of the 644PA's inputs, but there are a few still available for incorporating additional features.
 Share your mods on our forum at www.zeppelindesignlabs.com and/or the Google group mozzi-users.
 */
 
@@ -248,7 +248,7 @@ void handle_note_on(byte channel, byte note, byte velocity) {
     envelope2.setADLevels(velocity*2,velocity*2);
     envelope2.noteOn();
     mostRecentEnvelope=2;
-  } else if ((note1 == 129) || (mostRecentEnvelope == 2 && note2 < 129)) {  // condidtions for sounding on register 1
+  } else if ((note1 == 129) || (mostRecentEnvelope == 2 && note2 < 129)) {  // conditions for sounding on register 1
     note1 = note;  // Store the value of MIDI note in register 1.
     if (PortaOn==false) {
       pitch1 = Q16n16_to_float(Q16n16_mtof(Q8n0_to_Q16n16(note)));
@@ -292,7 +292,7 @@ void handle_control_change(byte channel, byte number, byte value){
     case 7:  // Channel volume
       channelVolume = value;
       break;
-    case 20:  // Pitch Bned Max/Min, value = 2->7 semitones. Look up multiplier in Bends array.
+    case 20:  // Pitch Bend Max/Min, value = 2->7 semitones. Look up multiplier in Bends array.
       PBmax = Bends[0][value];
       PBmin = Bends[1][value];
       break;
@@ -408,7 +408,7 @@ void updateControl() {
     if ((triggerZ[i] > 0) && (note_available[i] == 1)) {  // if key #i is pressed and is available to sound (ie, not already sounding)
       pitch = pitch_array[octave][i];
       note_available[i] = 0;        // mark note as unavailable, ie, playing
-      if ((note1 == 129) || (mostRecentEnvelope == 2 && note2 < 129)) {   // condidtions for sounding on register 1
+      if ((note1 == 129) || (mostRecentEnvelope == 2 && note2 < 129)) {   // conditions for sounding on register 1
         note1 = i;                  // Indicate that Register 1 is currently playing note i.
         pitch1 = pitch;
         waveforms[wave_form]->setFreq(pitch1);
