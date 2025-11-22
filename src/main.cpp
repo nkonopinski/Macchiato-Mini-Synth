@@ -237,6 +237,9 @@ void setup()
   envelope2.setADLevels(250,250);               // Sets Attack and Decay Levels; assumes Sustain, Decay, and Idle times
   envelope2.setDecayTime(100);                  // Sets Decay time in milliseconds
   envelope2.setSustainTime(32500);              // Sustain Time setting for envelope2
+
+  lpf1.setResonance(35);
+  lpf2.setResonance(35);
 //------FUNCTIONS-------------------------------------------------------------------------------
 
 }
@@ -438,21 +441,6 @@ gain_lfo1 = (int)((long)(waveformsLFO[LFO_wave_form]->next() + 128) * lfo_depth)
   out = cutoff - ((long)(cutoff * gain_lfo1)>>8);   // This adds the LFO component dangling below the cutoff value. Increasing lfo_depth extends this componenet down to cutoff=0 at max depth.
   lpf1.setCutoffFreq(out);
   lpf2.setCutoffFreq(out);            // It really does appear necessary to use two lpf calls to create proper polyphony.
-  
-  switch(wave_form)
-    {case 1:
-    lpf1.setResonance(190);                 // Sine wave max resonance    
-    lpf2.setResonance(190);
-  case 2:
-    lpf1.setResonance(190);                 // Triangle max resonance
-    lpf2.setResonance(190);
-    case 3:
-    lpf1.setResonance(180);                 // Saw max resonance
-    lpf2.setResonance(180);
-  case 4:
-    lpf1.setResonance(35);                  // Square wave max resonance
-    lpf2.setResonance(35);
-  }
    
 // Poll for Notes: MIDI then CTKeys -------------------------------------------------------------------------
 
