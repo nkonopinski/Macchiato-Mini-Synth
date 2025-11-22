@@ -72,6 +72,8 @@ MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MidiSettings);
 #include <tables/ramp512_int8.h>
 #include <tables/square_no_alias512_int8.h>
 
+#define CONTROL_RATE 128      // comment out to use default control rate of 64
+
 //Oscillator Functions declared for output waveforms, envelope 1 & 2.
 Oscil <2048, AUDIO_RATE> aSin1(SIN2048_DATA);
 Oscil <2048, AUDIO_RATE> aTriangle1(TRIANGLE2048_DATA);
@@ -88,15 +90,13 @@ Oscil <2048, AUDIO_RATE> aSquare2(SQUARE_NO_ALIAS_2048_DATA);
 Oscil <2048, AUDIO_RATE>* waveforms2[5] = {0 ,&aSin2,&aTriangle2,&aSaw2,&aSquare2};
 
 //Oscillator Function declared/define for LFO1&2 waveform
-Oscil <512, AUDIO_RATE> klfo_sin1(SIN512_DATA);
-Oscil <512, AUDIO_RATE> klfo_saw1(SAW512_DATA);
-Oscil <512, AUDIO_RATE> klfo_ramp1(RAMP512_DATA);
-Oscil <512, AUDIO_RATE> klfo_square1(SQUARE_NO_ALIAS512_DATA);
+Oscil <512, CONTROL_RATE> klfo_sin1(SIN512_DATA);
+Oscil <512, CONTROL_RATE> klfo_saw1(SAW512_DATA);
+Oscil <512, CONTROL_RATE> klfo_ramp1(RAMP512_DATA);
+Oscil <512, CONTROL_RATE> klfo_square1(SQUARE_NO_ALIAS512_DATA);
 
-Oscil <512, AUDIO_RATE>* waveformsLFO[5] = {0 ,&klfo_sin1,&klfo_saw1,&klfo_ramp1,&klfo_square1};
+Oscil <512, CONTROL_RATE>* waveformsLFO[5] = {0 ,&klfo_sin1,&klfo_saw1,&klfo_ramp1,&klfo_square1};
 
-
-#define CONTROL_RATE 128      // comment out to use default control rate of 64
 
 //ADSR declaration/definition
 ADSR <CONTROL_RATE, CONTROL_RATE> envelope1; 
@@ -193,7 +193,7 @@ const IntMap octIntMap(0,1024,0,5);        // returns 0-1-2-3. Use as Array Row.
 const IntMap attackIntMap(0,1024,28,2500);    // Min value must be large enough to prevent click at note start.
 const IntMap releaseIntMap(0,1024,25,3000);   // Min value must be large enough to prevent click at note end.
 const IntMap lfo_waveIntMap(0,1024,1,5);    // 1,5 returns 1-2-3-4.  
-const IntMap lfo_speedIntMap(0,1024,0,1400);  // 
+const IntMap lfo_speedIntMap(0,1024,2,150);  // Maps to 1-100, divided by 10 = 0.2-15.0 Hz
 const IntMap cutoffIntMap(0, 1024, 30, 180);  // Valid range 0-255 corresponds to freq 0-8192 (audio rate/2).
 const IntMap lfo_depthIntMap(0, 1024, 1, 256);  // LFO depth, as a percent multiplier of cutoff. 1=0% of cutoff, 256=100% of cutoff.
 
@@ -398,7 +398,7 @@ void updateControl()
       break;
     case 6:
     lfo_speed = lfo_speedIntMap(mozziAnalogRead(27));
-    waveformsLFO[LFO_wave_form]->setFreq((int)lfo_speed);
+    waveformsLFO[LFO_wave_form]->setFreq((float)lfo_speed / 10.0f);
     break;
    case 7:
     lfo_depth_pot = lfo_depthIntMap(mozziAnalogRead(29));   // LFO Depth, Pot 8
