@@ -197,6 +197,12 @@ const IntMap lfo_speedIntMap(0,1024,0,1400);  //
 const IntMap cutoffIntMap(0, 1024, 30, 180);  // Valid range 0-255 corresponds to freq 0-8192 (audio rate/2).
 const IntMap lfo_depthIntMap(0, 1024, 1, 256);  // LFO depth, as a percent multiplier of cutoff. 1=0% of cutoff, 256=100% of cutoff.
 
+// Forward declarations for MIDI handler functions
+void handle_note_on(byte channel, byte note, byte velocity);
+void handle_note_off(byte channel, byte note, byte velocity);
+void HandlePitchBend(byte channel, int bend);
+void handle_control_change(byte channel, byte number, byte value);
+
 // ----------------------------------------------------------------------------------------- 
 
 void setup()
