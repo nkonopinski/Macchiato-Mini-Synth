@@ -375,8 +375,10 @@ void updateControl()
  // ---------------------------------------------------------------------
  
  // Read the Pots, just one per Update cycle. This saves tremendous CPU time with no audible difference (in most cases)
-
  switch (j){
+    case 0:
+      cutoff = cutoffIntMap(mozziAnalogRead(28));             // Pot 7
+      break;
     case 1:
       wave_form = waveIntMap(mozziAnalogRead(30));          // returns 1-2-3-4. Pot 1
       break;
@@ -411,9 +413,6 @@ void updateControl()
     }
 j++;
 if(j>7){j=0;}         // This index steps us through the above seven pot reads, one per control update.
-
-// The following control requires CONTROL_RATE update for smooth sound. 
-cutoff = cutoffIntMap(mozziAnalogRead(28));             // Pot 7
 
 // Set up LFO ----------------------------------------------------------------------------------
   /*
