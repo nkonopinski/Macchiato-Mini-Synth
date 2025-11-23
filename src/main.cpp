@@ -115,8 +115,6 @@ int triggerA[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int triggerB[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int triggerC[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int triggerZ[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int debugCounter = 0;
-//byte midiSysex[128];
 
 LowPassFilter lpf1;       // Short hand declaration for LowPassFilter
 LowPassFilter lpf2;       // Necessary to get note2 to sound on its own
@@ -127,14 +125,9 @@ int note2 = 129;                 // polyphone register 2. Default 129=no note as
 int wav1;
 int wav2;
 int out;
-byte velocity;
 byte gain_adsr1;        // Stores gain multiplier contributed by ADSR envelope1
 byte gain_adsr2;        // Stores gain multiplier contributed by ADSR envelope2
 byte gain_lfo1;         // Stores gain multiplier contributed by lfo.
-float carrierFreq1 = 10.f;
-float carrierFreq2 = 10.f;
-float shifted1;
-float shifted2;
 float PBmax=0.12246;
 float PBmin=0.10911;
 byte channelVolume = 127;
@@ -329,7 +322,7 @@ float iPitchBend(int bend){
   }
 }
 
-void HandlePitchBend (byte channel, int bend){
+void HandlePitchBend(byte channel, int bend){
   float pitchBend = iPitchBend(bend);
   waveforms[wave_form]->setFreq(pitch1*pitchBend);
   waveforms2[wave_form]->setFreq(pitch2*pitchBend);
@@ -457,15 +450,6 @@ void updateControl() {
   if (PortaOn==true) {
     waveforms2[wave_form]->setFreq_Q16n16(aPortamento.next());
   }
-/*
-  midiSysex[debugCounter] = trigger[2];
-  debugCounter++;
-  if (debugCounter >= 128){
-  MIDI.sendSysEx(128, midiSysex, false);
-  debugCounter = 0;
-  }
-  */
-  //interrupts();
 }
 
 int updateAudio() {
