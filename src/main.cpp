@@ -188,25 +188,41 @@ void HandlePitchBend(byte channel, int bend);
 void handle_control_change(byte channel, byte number, byte value);
 
 
-void setup() {
-  int midiChannel;
-  bool x = true;
+// Set specific MIDI channel via midi learning if all knobs (except volume) are turned
+// full right on startup. Return to omni mode when all knobs are full left.
+int midiChannelSetup() {
+  bool allKnobsRight = true;
+  bool allKnobsLeft = true;
   for (int i = 24; i <= 31; i++) {
     if (analogRead(i) < 1000) {
-      x = false;
+      allKnobsRight = false;
+    }
+    if (analogRead(i) > 23) {
+      allKnobsLeft = false;
     }
   }
-  if (x) {
+
+  if (allKnobsRight) {
     midiChannelSelect = true;
-    EEPROM.write(3, true);
+    return MIDI_CHANNEL_OMNI;
   }
+
+  if (allKnobsLeft) {
+    if (!EEPROM.read(3)) {
+      EEPROM.write(3, true);
+    }
+  }
+
   if (EEPROM.read(3) == true) {
-    midiChannel = MIDI_CHANNEL_OMNI;
-  } else {
-    midiChannel = EEPROM.read(2) > 16 ? 0 : EEPROM.read(2);
+    return MIDI_CHANNEL_OMNI;
   }
+  return EEPROM.read(2) > 16 ? 0 : EEPROM.read(2);
+}
+
+
+void setup() {
   startMozzi(CONTROL_RATE);                     // Start the use of Mozzi with defined CONTROL_RATE
-  MIDI.begin(midiChannel);
+  MIDI.begin(midiChannelSetup());
   MIDI.setHandleNoteOn(handle_note_on);         // For detecting and setting what MIDI note is being pressed
   MIDI.setHandleNoteOff(handle_note_off);
   MIDI.setHandlePitchBend(HandlePitchBend);
@@ -222,12 +238,24 @@ void setup() {
   lpf2.setResonance(35);
 }
 
-void handle_note_on(byte channel, byte note, byte velocity) {
+// Only store first channel learned to reduce EEPROM writes
+void handleMidiChannelLearning(byte channel) {
   if (midiChannelSelect) {
-    EEPROM.write(2, channel);
-    EEPROM.write(3, false);
+    byte storedChannel = EEPROM.read(2);
+    bool storedOmniMode = EEPROM.read(3);
+    if (storedChannel != channel) {
+      EEPROM.write(2, channel);
+    }
+    if (storedOmniMode) {
+      EEPROM.write(3, false);  // Disable omni mode
+    }
     MIDI.setInputChannel(channel);
+    midiChannelSelect = false;
   }
+}
+
+void handle_note_on(byte channel, byte note, byte velocity) {
+  handleMidiChannelLearning(channel);
   if (velocity == 0) {        // if key has just been released
     if (note == note1) {      // If the note was playing in register 1,
       envelope1.noteOff();    // turn off envelope1
@@ -270,11 +298,7 @@ void handle_note_off(byte channel, byte note, byte velocity){
 }
 
 void handle_control_change(byte channel, byte number, byte value){
-  if (midiChannelSelect) {
-    EEPROM.write(2, channel);
-    EEPROM.write(3, false);
-    MIDI.setInputChannel(channel);
-  }
+  handleMidiChannelLearning(channel);
   switch (number) {
     case 1:  // Modulation
       lfo_depth = value*2+1;  // MIDI produces 0-127. lfo_depth wants 1-256.
@@ -291,16 +315,6 @@ void handle_control_change(byte channel, byte number, byte value){
     case 20:  // Pitch Bend Max/Min, value = 2->7 semitones. Look up multiplier in Bends array.
       PBmax = Bends[0][value];
       PBmin = Bends[1][value];
-      break;
-    case 124:
-      EEPROM.write(3, false);
-      MIDI.setInputChannel(EEPROM.read(2) > 16 ? 0 : EEPROM.read(2));
-      break;
-    case 125:
-      EEPROM.write(3, true);
-      MIDI.setInputChannel(MIDI_CHANNEL_OMNI);
-      break;
-    default:
       break;
   }
 }
