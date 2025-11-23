@@ -122,8 +122,6 @@ LowPassFilter lpf2;       // Necessary to get note2 to sound on its own
 byte mostRecentEnvelope = 2;     // Holds record of most-recently-played note register.
 int note1 = 129;                 // polyphony register 1. Default 129=no note assigned.
 int note2 = 129;                 // polyphone register 2. Default 129=no note assigned.
-int wav1;
-int wav2;
 int out;
 byte gain_adsr1;        // Stores gain multiplier contributed by ADSR envelope1
 byte gain_adsr2;        // Stores gain multiplier contributed by ADSR envelope2
@@ -453,9 +451,10 @@ void updateControl() {
 }
 
 int updateAudio() {
-  wav1 = waveforms[wave_form]->next();
-  wav2 = waveforms2[wave_form]->next();
-  return (int) (((long) gain_adsr1 * (-1 - lpf1.next(wav1)) + (long) gain_adsr2 * (-1 -lpf2.next(wav2))) >> 3);
+  return (
+    (long) gain_adsr1 * (lpf1.next(waveforms[wave_form]->next())) +
+    (long) gain_adsr2 * (lpf2.next(waveforms2[wave_form]->next()))
+  ) >> 3;
 }
 
 void loop() {
